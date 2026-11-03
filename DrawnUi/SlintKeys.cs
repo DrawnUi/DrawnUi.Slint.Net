@@ -4,7 +4,8 @@ using DrawnUi.Views;
 namespace DrawnUi.Slint;
 
 /// <summary>
-/// Slint's key events for DrawnUI: editor actions and text for a focused <c>SkiaEditor</c>, and
+/// Slint's key events for DrawnUI: keyboard navigation (Tab, and the keys of the node in focus), editor actions and text
+/// for a focused <c>SkiaEditor</c>, and
 /// <see cref="KeyboardManager"/> events for <c>OnKeyDown</c> handlers. Slint sends special keys as the private-use
 /// characters of <c>internal/common/key_codes.rs</c>.
 /// </summary>
@@ -16,8 +17,26 @@ internal static class SlintKeys
 
     public static bool Pressed(Canvas canvas, string text, bool shift, bool control, bool alt)
     {
-        if (ToInputKey(text) is { } key)
-            KeyboardManager.KeyboardPressed(key);
+        var key = ToInputKey(text);
+        if (key is { } pressed)
+            KeyboardManager.KeyboardPressed(pressed);
+
+        // Keyboard navigation, the rules of the other desktop heads (DrawnView.HandleKeyboardNavigation): Tab / Shift+Tab
+        // walk the Tab stops, also out of a drawn editor (no tab characters). Enter / Space / Escape / arrows / Home / End /
+        // PageUp / PageDown go to the node in keyboard focus while the keyboard is in use, so a game's keys stay its own;
+        // with nothing in focus only the arrows start navigation, and only when the app asked for it.
+        if (text == Tab)
+        {
+            if (canvas.FocusedChild is SkiaEditor editor)
+                canvas.AccessibilityManager.NotifyFocused(editor); // continue from the field, also when a click focused it
+            canvas.HandleKeyboardNavigation(InputKey.Tab, shift);
+            return true;
+        }
+
+        if (canvas.FocusedChild is not SkiaEditor && key is { } navigation
+            && (canvas.HasNoKeyboardFocus ? canvas.ArrowStartsNavigation(navigation) != null : canvas.KeyboardFocusNode != null)
+            && canvas.HandleKeyboardNavigation(navigation, shift))
+            return true;
 
         switch (text)
         {
@@ -28,8 +47,6 @@ internal static class SlintKeys
             case Right: canvas.DesktopEditorMoveCursor(1, shift); return true;
             case Home: canvas.DesktopEditorMoveToStart(shift); return true;
             case End: canvas.DesktopEditorMoveToEnd(shift); return true;
-            // Like the OpenTK head's CanvasHost, which has no Tab navigation of its own.
-            case Tab: canvas.HandleDesktopTextInput("    "); return true;
         }
 
         if (control)
