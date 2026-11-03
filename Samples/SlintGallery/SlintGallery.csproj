@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- As in HelloSlintNet, whose pages this sample compiles. -->
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SlintFile Include="ui/main.slint" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../DrawnUi/DrawnUi.Slint.Net.csproj" />
+    <!-- Slint's build files, which generate the classes, reach only direct references. -->
+    <PackageReference Include="yurkinh.slint.net" Version="1.19.0-preview.10" />
+  </ItemGroup>
+
+  <!--
+    The Hello app's pages and assets, from HelloSlintNet.
+    Not its Pong page: SlintPong hosts the game.
+  -->
+  <PropertyGroup>
+    <HelloApp>../HelloSlintNet/</HelloApp>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(HelloApp)Pages/*.cs" Exclude="$(HelloApp)Pages/PongPage.cs" Link="Pages/%(Filename)%(Extension)" />
+    <Compile Include="$(HelloApp)UiTimer.cs" Link="UiTimer.cs" />
+    <Content Include="$(HelloApp)fonts/**/*.*" Link="fonts/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(HelloApp)images/**/*.*" Link="images/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(HelloApp)shaders/**/*.*" Link="shaders/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(HelloApp)anims/**/*.*" Link="anims/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(HelloApp)lottie/**/*.*" Link="lottie/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- What a package reference to DrawnUi.Slint imports by itself: drawnui.slint for the app's imports. -->
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.Net.props" />
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.Net.targets" />
+
+</Project>

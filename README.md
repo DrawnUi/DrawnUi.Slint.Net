@@ -100,13 +100,15 @@ Run them from the repository's root.
   recycled cells, Lottie, shaders, the editor, the shell, tooltips and menus, Pong, and more.
 - `Samples/SlintEmbed`: two views next to a Slint header: a button whose taps reach the Slint UI, an editor, cards that light up on hover, and a ball that the arrow keys move.
   `SlintEmbed.Android` and `SlintEmbed.iOS` run the same scenes and `.slint` file on phones.
+- `Samples/SlintGallery`: a Slint sidebar that opens the Hello app's pages in a DrawnUI view next to it:
+  recycled cells, Lottie, shaders, the editor, the shell, and more.
 - `Samples/SlintPong`: the shared Pong game in a whole window, with the keyboard from the start.
 
 ```
 dotnet run --project Samples/HelloSlintNet
 ```
 
-`DRAWNUI_GPU=1` selects Slint's FemtoVG renderer on OpenGL, for the GPU path; HelloSlintNet takes it by default, and `DRAWNUI_GPU=0` keeps it on the raster path.
+`DRAWNUI_GPU=1` selects Slint's FemtoVG renderer on OpenGL, for the GPU path; HelloSlintNet and SlintGallery take it by default, and `DRAWNUI_GPU=0` keeps it on the raster path.
 `DRAWNUI_SELFTEST=<directory>` runs a sample as a test: it sends window events, as a user's mouse and keyboard would, saves frames as PNG files, and quits.
 
 ## Games
