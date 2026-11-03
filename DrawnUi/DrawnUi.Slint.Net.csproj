@@ -12,6 +12,15 @@
   <PropertyGroup>
     <Title>DrawnUI for Slint.NET</Title>
     <PackageId>DrawnUi.Slint.Net</PackageId>
+    <!-- The package version: change it here, then publish a GitHub release (see .github/workflows/release.yml). -->
+    <Version>0.1.0-preview.1</Version>
+    <Authors>Nick Kovalsky aka AppoMobi and contributors</Authors>
+    <Copyright>(c) AppoMobi and contributors 2026 - present day</Copyright>
+    <PackageProjectUrl>https://github.com/DrawnUi/DrawnUi.Slint.Net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DrawnUi/DrawnUi.Slint.Net</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Description>DrawnUI canvases in apps built on the community Slint .NET bindings (yurkinh.slint.net), on desktop and mobile. Not made or endorsed by Slint.</Description>
     <PackageTags>drawnui slint skia skiasharp desktop</PackageTags>
     <PackageIcon>icon128.png</PackageIcon>
@@ -22,6 +31,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\icon128.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
