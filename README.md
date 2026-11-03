@@ -4,6 +4,7 @@
 community Slint .NET bindings: the [`yurkinh.slint.net`](https://www.nuget.org/packages/yurkinh.slint.net) package, built
 from [yurkinh/slint](https://github.com/yurkinh/slint/tree/dotnet_bindings/api/dotnet). Slint has not released .NET
 bindings of its own; this project is not made or endorsed by Slint (SixtyFPS GmbH).
+Our code is MIT; an app that uses it also takes on Slint's license, see [Licensing](#licensing).
 A Slint UI and DrawnUI controls share a window: a `DrawnUiView` element shows a canvas, and passes its size, mouse, wheel, and keyboard input to it.
 
 ![The gallery: a Slint sidebar, and DrawnUI's shader page](screenshots/gallery.jpg)
@@ -114,3 +115,23 @@ The `DrawnUi.Net.Game` package brings `DrawnGame`, the game base of the other he
 A game can fill the window, or share it with a Slint UI.
 
 <img src="screenshots/pong.jpg" alt="Pong in a Slint window" width="240" />
+
+## Licensing
+
+The code in this repository is under the [MIT License](LICENSE), like DrawnUI.
+
+An app built with it also uses Slint, through the community .NET bindings (`yurkinh.slint.net`), and those come under
+Slint's own licenses, not ours. As of November 2026, Slint can be used under any one of these, at the app author's choice:
+
+- **GNU GPLv3**: for open-source apps, on desktop, mobile, web and embedded. The whole app then has to be under
+  GPL-compatible terms; MIT code, such as this repository's, can be part of it.
+- **Slint Royalty-free License 2.0**: for proprietary desktop, mobile and web apps, at no cost, as long as the app shows
+  that it uses Slint, for example with the `AboutSlint` widget or the Slint badge. It does not cover embedded systems.
+- **Slint commercial license**: for proprietary apps without that disclosure, and required for embedded systems.
+
+This is a summary to help you find your way, not legal advice, and Slint's terms can change. The terms that apply are
+the ones in Slint's [LICENSE.md](https://github.com/slint-ui/slint/blob/master/LICENSE.md) and its
+[licenses folder](https://github.com/slint-ui/slint/tree/master/LICENSES); see also [slint.dev](https://slint.dev) for
+the commercial plans. The `yurkinh.slint.net` package carries the same Slint license file.
+
+DrawnUI itself ([DrawnUi.Net](https://github.com/DrawnUi/DrawnUi.Net)) and SkiaSharp are MIT.
