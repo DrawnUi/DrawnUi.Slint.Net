@@ -34,13 +34,13 @@ internal static class SelfTest
         }
         // the Shaders page scrolled down a screen at a time, with the frame times while its animated effects run
         Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 300), () => _ = GoTo(shell, "shaders"));
-        for (var i = 1; i <= 3; i++)
+        for (var i = 1; i <= 5; i++)
         {
             var n = i;
             var from = 0;
             Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 1200), () =>
             {
-                window.Window.DispatchEvent(new WindowEvent.PointerScrolled(new LogicalPosition(490, 500), 0, -700));
+                window.Window.DispatchEvent(new WindowEvent.PointerScrolled(new LogicalPosition(490, 500), 0, -250));
                 from = times.Count;
             });
             Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 2000), () =>
