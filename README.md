@@ -1,6 +1,6 @@
 # DrawnUI for Slint
 
-`DrawnUi.Slint` hosts DrawnUI canvases in the windows of a [Slint for .NET](https://github.com/yurkinh/slint/tree/dotnet_bindings/api/dotnet) app.
+`DrawnUi.Slint` hosts DrawnUI canvases, from the `DrawnUi.Net` package, in the windows of a [Slint for .NET](https://github.com/yurkinh/slint/tree/dotnet_bindings/api/dotnet) app.
 A Slint UI and DrawnUI controls share a window: a `DrawnUiView` element shows a canvas, and passes its size, mouse, wheel, and keyboard input to it.
 
 ![The gallery: a Slint sidebar, and DrawnUI's shader page](screenshots/gallery.jpg)
@@ -49,7 +49,9 @@ and import `DrawnUi/buildTransitive/DrawnUi.Slint.props` and `.targets`, which a
 
 ## How It Works
 
-The canvas draws when something changed, at most once a display frame, and the view shows the frame as an image.
+The canvas draws when it asks for a frame (`DrawnView.FrameRequested`), at most once a display period, and the view shows
+the frame as an image. Nothing runs on a timer: an idle canvas draws no frame and costs no CPU, an animation draws at the
+display's rate.
 
 - By default, the canvas draws into a raster surface, whose pixels the view shows, with any Slint renderer.
 - With `SlintCanvasHost.UseGpu = true` and Slint's FemtoVG renderer on OpenGL, it draws with Skia on that context instead,
@@ -90,14 +92,14 @@ or in the `Main` that calls `Run` on iOS.
 
 Run them from the repository's root.
 
-- `Samples/HelloSlint`: two views next to a Slint header: a button whose taps reach the Slint UI, an editor, cards that light up on hover, and a ball that the arrow keys move.
-  `HelloSlint.Android` and `HelloSlint.iOS` run the same scenes and `.slint` file on phones.
-- `Samples/SlintGallery`: a Slint sidebar that opens the pages of the OpenTK Hello app, compiled unchanged:
-  recycled cells, Lottie, shaders, the editor, the shell, and more.
+- `Samples/HelloSlint`: the DrawnUI Hello app, the same pages as on the other heads in one window-filling view:
+  recycled cells, Lottie, shaders, the editor, the shell, tooltips and menus, Pong, and more.
+- `Samples/SlintEmbed`: two views next to a Slint header: a button whose taps reach the Slint UI, an editor, cards that light up on hover, and a ball that the arrow keys move.
+  `SlintEmbed.Android` and `SlintEmbed.iOS` run the same scenes and `.slint` file on phones.
 - `Samples/SlintPong`: the shared Pong game in a whole window, with the keyboard from the start.
 
 ```
-dotnet run --project src/Slint/Samples/SlintGallery
+dotnet run --project Samples/HelloSlint
 ```
 
 `DRAWNUI_GPU=1` selects Slint's FemtoVG renderer on OpenGL, for the GPU path.
@@ -105,7 +107,7 @@ dotnet run --project src/Slint/Samples/SlintGallery
 
 ## Games
 
-`DrawnUi.Slint.Game` brings `DrawnGame`, the game base of the other heads, with its loop and keyboard input.
+The `DrawnUi.Net.Game` package brings `DrawnGame`, the game base of the other heads, with its loop and keyboard input.
 A game can fill the window, or share it with a Slint UI.
 
 <img src="screenshots/pong.jpg" alt="Pong in a Slint window" width="240" />
