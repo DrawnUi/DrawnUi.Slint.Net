@@ -102,7 +102,7 @@ Run them from the repository's root.
 dotnet run --project Samples/HelloSlint
 ```
 
-`DRAWNUI_GPU=1` selects Slint's FemtoVG renderer on OpenGL, for the GPU path.
+`DRAWNUI_GPU=1` selects Slint's FemtoVG renderer on OpenGL, for the GPU path; HelloSlint takes it by default, and `DRAWNUI_GPU=0` keeps it on the raster path.
 `DRAWNUI_SELFTEST=<directory>` runs a sample as a test: it sends window events, as a user's mouse and keyboard would, saves frames as PNG files, and quits.
 
 ## Games

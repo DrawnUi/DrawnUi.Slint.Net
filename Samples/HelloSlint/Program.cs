@@ -59,11 +59,19 @@ internal static class Program
             TextColor = Colors.White,
         };
 
-        // DRAWNUI_GPU=1: Slint's FemtoVG renderer on OpenGL, whose context DrawnUI draws on.
-        if (Environment.GetEnvironmentVariable("DRAWNUI_GPU") == "1")
+        // On the GPU, like the other Hello apps: Slint's FemtoVG renderer on OpenGL, whose context DrawnUI draws on.
+        // Shaders and effects run on the CPU otherwise. DRAWNUI_GPU=0 keeps the raster path.
+        if (Environment.GetEnvironmentVariable("DRAWNUI_GPU") != "0")
         {
-            new Slint.BackendSelector().RendererName("femtovg").RequireOpenGL().Select();
-            SlintCanvasHost.UseGpu = true;
+            try
+            {
+                new Slint.BackendSelector().RendererName("femtovg").RequireOpenGL().Select();
+                SlintCanvasHost.UseGpu = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"OpenGL is not available, drawing on the CPU: {e.Message}");
+            }
         }
 
         using var window = MainWindow.Create();
@@ -87,7 +95,7 @@ internal static class Program
         host.Canvas.WasDrawn += preload;
 
         if (Environment.GetEnvironmentVariable("DRAWNUI_SELFTEST") is { Length: > 0 } outDir)
-            SelfTest.Run(host, outDir);
+            SelfTest.Run(window, host, outDir);
 
         window.Run();
     }

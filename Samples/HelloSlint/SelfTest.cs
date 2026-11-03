@@ -9,7 +9,7 @@ internal static class SelfTest
 {
     private static readonly string[] Pages = ["looks", "animations", "shaders", "cells", "text", "shapes", "pong"];
 
-    public static void Run(SlintCanvasHost host, string outDir)
+    public static void Run(MainWindow window, SlintCanvasHost host, string outDir)
     {
         Directory.CreateDirectory(outDir);
         var times = new List<double>();
@@ -30,6 +30,25 @@ internal static class SelfTest
             {
                 host.SaveFrame(Path.Combine(outDir, $"{n}-{route}.png"));
                 Console.WriteLine($"{route}: {times.Count} frames so far");
+            });
+        }
+        // the Shaders page scrolled down a screen at a time, with the frame times while its animated effects run
+        Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 300), () => _ = GoTo(shell, "shaders"));
+        for (var i = 1; i <= 3; i++)
+        {
+            var n = i;
+            var from = 0;
+            Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 1200), () =>
+            {
+                window.Window.DispatchEvent(new WindowEvent.PointerScrolled(new LogicalPosition(490, 500), 0, -700));
+                from = times.Count;
+            });
+            Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 2000), () =>
+            {
+                host.SaveFrame(Path.Combine(outDir, $"shaders-{n}.png"));
+                var page = times.Skip(from).ToList();
+                if (page.Count > 0)
+                    Console.WriteLine($"shaders, screen {n}: {page.Count} frames in 2 s, average {page.Average():F2} ms, max {page.Max():F2} ms");
             });
         }
         Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 300), () =>
