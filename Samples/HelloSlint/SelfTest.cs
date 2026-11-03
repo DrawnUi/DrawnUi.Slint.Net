@@ -1,70 +1,48 @@
 using DrawnUi.Draw;
 using DrawnUi.Slint;
-using HelloSlint;
 using Slint;
-using Event = Slint.WindowEvent;
 
-/// Sends window events, as a user's mouse and keyboard would, saves frames, and quits.
+namespace HelloSlint;
+
+/// <summary>Opens pages through the shell, saves each page's frame, prints the frame times and idle redraws, and quits.</summary>
 internal static class SelfTest
 {
-    public static void Run(MainWindow window, SlintCanvasHost cards, SlintCanvasHost keys, CardsScene scene, string outDir)
+    private static readonly string[] Pages = ["looks", "animations", "shaders", "cells", "text", "shapes", "pong"];
+
+    public static void Run(SlintCanvasHost host, string outDir)
     {
         Directory.CreateDirectory(outDir);
         var times = new List<double>();
-        cards.FrameRendered += times.Add;
-        void Send(Event e) => window.Window.DispatchEvent(e);
-        // The center of a DrawnUI control, in window coordinates.
-        LogicalPosition At(SkiaControl c, float dy = 0) =>
-            new(window.CardsX + c.DrawingRect.MidX / cards.Scale, window.CardsY + c.DrawingRect.MidY / cards.Scale + dy);
-        void Click(LogicalPosition p)
-        {
-            Send(new Event.PointerMoved(p));
-            Send(new Event.PointerPressed(p, PointerEventButton.Left));
-            Send(new Event.PointerReleased(p, PointerEventButton.Left));
-        }
-        void Type(string text)
-        {
-            Send(new Event.KeyPressed(text));
-            Send(new Event.KeyReleased(text));
-        }
+        host.FrameRendered += times.Add;
+        var shell = HelloApp.Shell;
 
-        var steps = new (int Ms, Action Act)[]
+        var ms = 1500;
+        Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms), () => host.SaveFrame(Path.Combine(outDir, "0-menu.png")));
+        // idle on the root page: a host that draws on demand draws nothing here
+        var idleFrom = 0;
+        Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 500), () => idleFrom = times.Count);
+        Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 2000), () => Console.WriteLine($"idle: {times.Count - idleFrom} frames in 2 s"));
+        for (var i = 0; i < Pages.Length; i++)
         {
-            (900, () => Console.WriteLine($"window {window.Window.Size} logical {window.Window.LogicalSize}, cards at {window.CardsX},{window.CardsY}, keys at {window.KeysX},{window.KeysY}")),
-            (1000, () => Send(new Event.PointerMoved(At(scene.Scroll)))),
-            (1200, () => cards.SaveFrame(Path.Combine(outDir, "1-hover.png"))),
-            (1300, () => Click(At(scene.Button))),
-            (1500, () => Click(At(scene.Editor))),
-            (1700, () => { foreach (var c in "Hi Slint") Type(c.ToString()); Type("\u0008"); }),
-            (2000, () => Send(new Event.PointerScrolled(At(scene.Scroll), 0, -300))),
-            (3300, () => Console.WriteLine($"scroll offset before leaving: {scene.Scroll.ViewportOffsetY:F0}")),
-            (3400, () =>
+            var (n, route) = (i + 1, Pages[i]);
+            Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 300), () => _ = GoTo(shell, route));
+            Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 1500), () =>
             {
-                var p = new LogicalPosition(window.KeysX + 20, window.KeysY + 80);
-                Click(p);
-                for (var i = 0; i < 3; i++) Type("");
-                Type("");
-            }),
-            // On the GPU a frame is saved with the next frame that the window renders.
-            (4000, () =>
-            {
-                cards.SaveFrame(Path.Combine(outDir, "2-cards.png"));
-                keys.SaveFrame(Path.Combine(outDir, "3-keys.png"));
-                if (Environment.GetEnvironmentVariable("DRAWNUI_GPU") is { Length: > 0 })
-                    cards.SaveWindow(Path.Combine(outDir, "4-window.png"));
-            }),
-            (4300, () =>
-            {
-                Console.WriteLine($"GPU: cards {cards.IsGpu}, keys {keys.IsGpu}");
-                Console.WriteLine($"status: {window.Status}");
-                Console.WriteLine($"editor: {scene.Editor.Text}");
-                Console.WriteLine($"scroll offset: {scene.Scroll.ViewportOffsetY:F0}");
-                var rest = times.Skip(1).ToList();
-                Console.WriteLine($"scale {cards.Scale}, frames {times.Count}, first {times[0]:F1} ms, then average {rest.Average():F2} ms, max {rest.Max():F2} ms");
-                EventLoop.Quit();
-            }),
-        };
-        foreach (var (ms, act) in steps)
-            Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms), act);
+                host.SaveFrame(Path.Combine(outDir, $"{n}-{route}.png"));
+                Console.WriteLine($"{route}: {times.Count} frames so far");
+            });
+        }
+        Slint.Timer.SingleShot(TimeSpan.FromMilliseconds(ms += 300), () =>
+        {
+            var rest = times.Skip(1).ToList();
+            Console.WriteLine($"GPU {host.IsGpu}, scale {host.Scale}, frames {times.Count}, average {rest.Average():F2} ms, max {rest.Max():F2} ms");
+            EventLoop.Quit();
+        });
+    }
+
+    private static async Task GoTo(SkiaShell shell, string route)
+    {
+        await shell.PopToRootAsync();
+        await shell.GoToAsync(route, false);
     }
 }

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using AppoMobi.Gestures;
 using DrawnUi.Draw;
 using DrawnUi.Views;
 using SkiaSharp;
@@ -7,7 +8,6 @@ using SlintComponent = global::Slint.ComponentInstance;
 using SlintEventLoop = global::Slint.EventLoop;
 using SlintImage = global::Slint.Image;
 using SlintTimer = global::Slint.Timer;
-using SlintTimerMode = global::Slint.TimerMode;
 
 namespace DrawnUi.Slint;
 
@@ -15,7 +15,8 @@ namespace DrawnUi.Slint;
 /// Runs a DrawnUI <see cref="Views.Canvas"/> in a <c>DrawnUiView</c> of a Slint component, from <c>drawnui.slint</c>.
 /// </summary>
 /// <remarks>
-/// The canvas draws when something changed, at most once a display frame, and the view shows each frame as an image.
+/// The canvas draws when it asks for a frame (<see cref="DrawnView.FrameRequested"/>), at most once a display frame, and
+/// the view shows each frame as an image; an idle canvas costs nothing.
 /// By default it draws into a raster surface, whose pixels the view shows, with any Slint renderer.
 /// With <see cref="UseGpu"/> and Slint's FemtoVG renderer on OpenGL, it draws with Skia on that context instead,
 /// into a texture that the view shows without copying pixels.
@@ -35,6 +36,7 @@ public sealed class SlintCanvasHost : IDisposable
         ArgumentOutOfRangeException.ThrowIfNegative(viewId);
         EnsureInitialized();
         var views = Views.GetValue(component, c => new ComponentViews(c));
+        views.EnsureFree(viewId);
         var host = new SlintCanvasHost(component, viewId, views, canvas ?? new Canvas());
         views.Add(host);
         return host;
@@ -65,8 +67,11 @@ public sealed class SlintCanvasHost : IDisposable
     private readonly SlintComponent _component;
     private readonly ComponentViews _views;
     private readonly SlintDrawable _drawable = new();
-    private readonly SlintTimer _frameTimer = new();
     private readonly Stopwatch _clock = Stopwatch.StartNew();
+    private readonly TimeSpan _framePeriod;
+    private long _lastFrameStarted;
+    private int _frameScheduled;
+    private bool _disposed;
     private SKSurface? _surface;
     private SlintGpuRenderer.Target? _gpuTarget;
     private string? _pendingSave;
@@ -85,10 +90,30 @@ public sealed class SlintCanvasHost : IDisposable
         Canvas = canvas;
         Canvas.ConnectDesktopDrawable(_drawable);
         var refreshRate = Super.RefreshRate > 0 ? Super.RefreshRate : 60;
-        // Animators and Update() mark the canvas dirty; it draws then, at most once a display frame.
-        _frameTimer.Start(SlintTimerMode.Repeated, TimeSpan.FromSeconds(1 / refreshRate), () =>
+        _framePeriod = TimeSpan.FromSeconds(1 / refreshRate);
+        // Animators and Update() ask for a frame; it draws then, at most once a display frame.
+        Canvas.FrameRequested += OnFrameRequested;
+    }
+
+    // Raised once until the next frame starts, on the thread that asked (it can be a background thread).
+    private void OnFrameRequested(object? sender, EventArgs e)
+    {
+        if (Interlocked.Exchange(ref _frameScheduled, 1) == 1)
+            return;
+        if (MainThread.IsMainThread)
+            ScheduleFrame();
+        else
+            SlintEventLoop.InvokeFromEventLoop(ScheduleFrame);
+    }
+
+    private void ScheduleFrame()
+    {
+        // a display period after the last frame started, or at once when it is already over
+        var wait = _framePeriod - Stopwatch.GetElapsedTime(_lastFrameStarted);
+        SlintTimer.SingleShot(wait > TimeSpan.Zero ? wait : TimeSpan.Zero, () =>
         {
-            if (NeedsFrame)
+            Volatile.Write(ref _frameScheduled, 0);
+            if (!_disposed && NeedsFrame)
                 Render();
         });
     }
@@ -172,6 +197,7 @@ public sealed class SlintCanvasHost : IDisposable
 
     private void DrawInto(SKSurface surface)
     {
+        _lastFrameStarted = Stopwatch.GetTimestamp();
         var nanos = _clock.Elapsed.Ticks * 100;
         _drawable.Surface = surface;
         _drawable.SignalFrame(nanos);
@@ -325,7 +351,10 @@ public sealed class SlintCanvasHost : IDisposable
     /// <summary>Stops drawing, and releases the canvas and its surfaces.</summary>
     public void Dispose()
     {
-        _frameTimer.Dispose();
+        if (_disposed)
+            return;
+        _disposed = true;
+        Canvas.FrameRequested -= OnFrameRequested;
         _views.Remove(this);
         Canvas.Dispose();
         _surface?.Dispose();
@@ -377,10 +406,16 @@ public sealed class SlintCanvasHost : IDisposable
                 Find(args)?.Key((bool)args[1]!, (string)args[2]!, (bool)args[3]!, (bool)args[4]!, (bool)args[5]!) ?? false);
         }
 
+        public void EnsureFree(int viewId)
+        {
+            if (_hosts.ContainsKey(viewId))
+                throw new InvalidOperationException($"A canvas is already attached to the view {viewId}.");
+        }
+
         public void Add(SlintCanvasHost host)
         {
-            if (!_hosts.TryAdd(host.ViewId, host))
-                throw new InvalidOperationException($"A canvas is already attached to the view {host.ViewId}.");
+            EnsureFree(host.ViewId);
+            _hosts.Add(host.ViewId, host);
             while (_frames.Count <= host.ViewId)
             {
                 _frames.Add(new SlintImage());

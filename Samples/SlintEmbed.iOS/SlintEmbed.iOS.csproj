@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-ios</TargetFramework>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>SlintEmbed</RootNamespace>
+    <ApplicationId>com.companyname.drawnui.slintembed</ApplicationId>
+    <ApplicationTitle>DrawnUI on Slint</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SlintFile Include="../SlintEmbed/ui/main.slint" />
+    <Compile Include="../SlintEmbed/CardsScene.cs" />
+    <Compile Include="../SlintEmbed/KeysScene.cs" />
+    <Compile Include="../SlintEmbed/SelfTest.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../DrawnUi/DrawnUi.Slint.csproj" />
+    <PackageReference Include="yurkinh.slint.net" Version="1.19.0-preview.10" />
+  </ItemGroup>
+
+  <!-- What a package reference to DrawnUi.Slint imports by itself: drawnui.slint for the app's imports. -->
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.props" />
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.targets" />
+
+</Project>

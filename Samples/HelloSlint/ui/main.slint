@@ -1,53 +1,21 @@
-import { Button, HorizontalBox } from "std-widgets.slint";
 import { DrawnUiView } from "drawnui.slint";
 export { DrawnUiHost } from "drawnui.slint";
 
+// The whole window is one DrawnUI view, as the other Hello apps' windows are one canvas.
 export component MainWindow inherits Window {
-    title: "DrawnUI on Slint";
-    preferred-width: 900px;
-    preferred-height: 700px;
-    background: #20242c;
+    title: "DrawnUI for Slint";
+    icon: @image-url("../images/drawnui.svg");
+    preferred-width: 980px;
+    preferred-height: 820px;
+    background: #212529;
+    // keys reach the drawn pages at once, without a click first
+    forward-focus: view;
 
-    in property <string> status: "Tap the DrawnUI button, or reset it from Slint";
-    callback reset();
-    // Where the views are in the window, for the self-test, which sends window events.
-    out property <length> cards-x: cards.absolute-position.x;
-    out property <length> cards-y: cards.absolute-position.y;
-    out property <length> keys-x: keys.absolute-position.x;
-    out property <length> keys-y: keys.absolute-position.y;
-
-    VerticalLayout {
-        // Clear of a phone's status bar and rounded corners; zero on the desktop.
-        padding-top: root.safe-area-insets.top;
-        padding-bottom: root.safe-area-insets.bottom;
-        padding-left: root.safe-area-insets.left;
-        padding-right: root.safe-area-insets.right;
-        HorizontalBox {
-            vertical-stretch: 0;
-            Text {
-                text: root.status;
-                color: white;
-                vertical-alignment: center;
-            }
-            Button {
-                text: "Reset from Slint";
-                clicked => {
-                    root.reset();
-                }
-            }
-        }
-
-        HorizontalLayout {
-            padding: 8px;
-            spacing: 8px;
-            cards := DrawnUiView {
-                view-id: 0;
-                horizontal-stretch: 2;
-            }
-            keys := DrawnUiView {
-                view-id: 1;
-                horizontal-stretch: 1;
-            }
-        }
+    view := DrawnUiView {
+        view-id: 0;
+        x: root.safe-area-insets.left;
+        y: root.safe-area-insets.top;
+        width: root.width - root.safe-area-insets.left - root.safe-area-insets.right;
+        height: root.height - root.safe-area-insets.top - root.safe-area-insets.bottom;
     }
 }

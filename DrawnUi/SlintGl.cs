@@ -16,6 +16,7 @@ internal sealed unsafe class SlintGl
     private const uint BlendEquationRgb = 0x8009, BlendEquationAlpha = 0x883D;
     private const uint CurrentProgram = 0x8B8D, VertexArrayBinding = 0x85B5, ArrayBuffer = 0x8892, ArrayBufferBinding = 0x8894;
     private const uint ActiveTextureParam = 0x84E0, Texture0 = 0x84C0, TextureBinding2D = 0x8069, UnpackAlignment = 0x0CF5;
+    private const uint DepthWriteMask = 0x0B72, ColorWriteMask = 0x0C23, StencilWriteMask = 0x0B98;
 
     private readonly delegate* unmanaged<int, uint*, void> _genTextures;
     private readonly delegate* unmanaged<int, uint*, void> _deleteTextures;
@@ -37,6 +38,10 @@ internal sealed unsafe class SlintGl
     private readonly delegate* unmanaged<uint, void> _activeTexture;
     private readonly delegate* unmanaged<uint, int, void> _pixelStorei;
     private readonly delegate* unmanaged<int, int, int, int, uint, uint, void*, void> _readPixels;
+    private readonly delegate* unmanaged<uint, byte*, void> _getBooleanv;
+    private readonly delegate* unmanaged<byte, void> _depthMask;
+    private readonly delegate* unmanaged<byte, byte, byte, byte, void> _colorMask;
+    private readonly delegate* unmanaged<uint, void> _stencilMask;
 
     public SlintGl(GraphicsApi api)
     {
@@ -60,6 +65,10 @@ internal sealed unsafe class SlintGl
         _activeTexture = (delegate* unmanaged<uint, void>)Load(api, "glActiveTexture");
         _pixelStorei = (delegate* unmanaged<uint, int, void>)Load(api, "glPixelStorei");
         _readPixels = (delegate* unmanaged<int, int, int, int, uint, uint, void*, void>)Load(api, "glReadPixels");
+        _getBooleanv = (delegate* unmanaged<uint, byte*, void>)Load(api, "glGetBooleanv");
+        _depthMask = (delegate* unmanaged<byte, void>)Load(api, "glDepthMask");
+        _colorMask = (delegate* unmanaged<byte, byte, byte, byte, void>)Load(api, "glColorMask");
+        _stencilMask = (delegate* unmanaged<uint, void>)Load(api, "glStencilMask");
     }
 
     private static nint Load(GraphicsApi api, string name)
@@ -108,7 +117,7 @@ internal sealed unsafe class SlintGl
         return (width, height, flipped);
     }
 
-    /// <summary>The state that Skia changes and Slint's renderer relies on, since they share the context.</summary>
+    /// <summary>The state that Skia changes and Slint's renderer relies on, since they share the context, write masks included.</summary>
     public State Save()
     {
         var s = new State();
@@ -136,6 +145,11 @@ internal sealed unsafe class SlintGl
         _activeTexture(Texture0);
         _getIntegerv(TextureBinding2D, &value); s.Texture0 = (uint)value;
         _getIntegerv(UnpackAlignment, &value); s.UnpackAlignment = value;
+        _getIntegerv(StencilWriteMask, &value); s.StencilWriteMask = (uint)value;
+        byte depth;
+        _getBooleanv(DepthWriteMask, &depth); s.DepthWrite = depth;
+        fixed (byte* color = s.ColorWrite)
+            _getBooleanv(ColorWriteMask, color);
         return s;
     }
 
@@ -158,6 +172,9 @@ internal sealed unsafe class SlintGl
         _bindTexture(Texture2D, s.Texture0);
         _activeTexture(s.ActiveTexture);
         _pixelStorei(UnpackAlignment, s.UnpackAlignment);
+        _depthMask(s.DepthWrite);
+        _colorMask(s.ColorWrite[0], s.ColorWrite[1], s.ColorWrite[2], s.ColorWrite[3]);
+        _stencilMask(s.StencilWriteMask);
     }
 
     private void Set(uint capability, bool on)
@@ -171,8 +188,10 @@ internal sealed unsafe class SlintGl
     public sealed class State
     {
         public uint Framebuffer, BlendSrcRgb, BlendDstRgb, BlendSrcAlpha, BlendDstAlpha, BlendEquationRgb, BlendEquationAlpha;
-        public uint Program, VertexArray, ArrayBuffer, ActiveTexture, Texture0;
+        public uint Program, VertexArray, ArrayBuffer, ActiveTexture, Texture0, StencilWriteMask;
         public int UnpackAlignment;
+        public byte DepthWrite;
+        public readonly byte[] ColorWrite = new byte[4];
         public bool Scissor, Blend, Depth, Stencil, Cull;
         public readonly int[] Viewport = new int[4], ScissorBox = new int[4];
     }

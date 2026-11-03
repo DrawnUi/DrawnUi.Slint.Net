@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SlintFile Include="ui/main.slint" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../DrawnUi/DrawnUi.Slint.csproj" />
+    <!-- Slint's build files, which generate the classes, reach only direct references. -->
+    <PackageReference Include="yurkinh.slint.net" Version="1.19.0-preview.10" />
+  </ItemGroup>
+
+  <!-- What a package reference to DrawnUi.Slint imports by itself: drawnui.slint for the app's imports. -->
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.props" />
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.targets" />
+
+</Project>
