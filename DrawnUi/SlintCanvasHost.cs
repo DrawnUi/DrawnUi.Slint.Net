@@ -210,6 +210,12 @@ public sealed class SlintCanvasHost : IDisposable
     /// <summary>Draws into the texture, from the window's rendering notifier, where the context is current.</summary>
     internal void RenderGpu(SlintGpuRenderer gpu)
     {
+        // a size reported before the first frame, whose timer waits while the user drags a window edge
+        if (_resizeScheduled)
+        {
+            _resizeScheduled = false;
+            ApplyPendingSize();
+        }
         if (!NeedsFrame)
             return;
         var started = Stopwatch.GetTimestamp();
@@ -291,6 +297,13 @@ public sealed class SlintCanvasHost : IDisposable
     {
         _logicalWidth = width;
         _logicalHeight = height;
+        // While the user drags a window edge, Windows runs its own loop and Slint's timers wait for the mouse release:
+        // a view that already drew follows the size at once.
+        if (_width > 0)
+        {
+            ApplySize();
+            return;
+        }
         if (_resizeScheduled)
             return;
         // The view reports its size from a change handler, where Slint may still be creating it, and once for each
@@ -305,11 +318,18 @@ public sealed class SlintCanvasHost : IDisposable
 
     private void ApplySize()
     {
+        if (ApplyPendingSize())
+            Render();
+    }
+
+    // Takes the size the view reported last; false when it did not change.
+    private bool ApplyPendingSize()
+    {
         var scale = Scale;
         var width = (int)Math.Round(_logicalWidth * scale);
         var height = (int)Math.Round(_logicalHeight * scale);
         if (width <= 0 || height <= 0 || (width == _width && height == _height && Math.Abs(Canvas.RenderingScale - scale) < 0.001))
-            return;
+            return false;
         _width = width;
         _height = height;
         _drawable.CanvasSize = new SKSize(width, height);
@@ -319,7 +339,7 @@ public sealed class SlintCanvasHost : IDisposable
         Canvas.WidthRequest = _logicalWidth;
         Canvas.HeightRequest = _logicalHeight;
         _drawable.HasDrawn = false;
-        Render();
+        return true;
     }
 
     internal void Pointer(int kind, int button, bool touch, float x, float y)
