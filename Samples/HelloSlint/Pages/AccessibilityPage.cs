@@ -9,8 +9,7 @@ namespace HelloSlint.Pages;
 /// <summary>
 /// Accessibility snippet: the same AccessibilityRole / Label / Hint / IsPressed / Live properties as
 /// the other heads feed the engine's <see cref="SkiaAccessibilityManager"/> snapshot. Ported from the
-/// React demo's AccessibilityPage.tsx. The Slint host does not publish the snapshot to screen readers yet (the OpenTK, WPF and MAUI heads do: UI Automation on Windows
-/// (WindowsUiaProvider), AT-SPI on Linux (LinuxAtSpiProvider)).
+/// React demo's AccessibilityPage.tsx. The Slint host publishes the snapshot as accessible Slint elements, which Slint hands to the platform's screen readers.
 /// </summary>
 public class AccessibilityPage : SkiaLayer
 {
@@ -52,7 +51,7 @@ public class AccessibilityPage : SkiaLayer
 
                         Card("Accessibility snapshot (Canvas.AccessibilityManager)",
                             new SkiaLabel("Nodes in the snapshot: … · focused: none · last activated: -") { FontSize = 14, TextColor = Color.Parse("#DEE2E6"), HorizontalOptions = LayoutOptions.Fill, AccessibilityRole = Aria.RoleStatus, AccessibilityLive = Aria.LivePolite }.Assign(out _snapshot),
-                            new SkiaLabel("Slint head: the snapshot below is built as on every head, but this host does not publish it to screen readers or move the focus with Tab yet; the OpenTK, WPF and MAUI heads do.")
+                            new SkiaLabel("Slint head: every node is published to screen readers as an accessible Slint element (role, name, help text, value, toggle state, press and step actions), so Narrator reads it through Slint's own accessibility. Tab, the arrow keys in groups, Enter and Space work as on the other desktop heads.")
                             {
                                 FontSize = 12, TextColor = Color.Parse("#ADB5BD"), HorizontalOptions = LayoutOptions.Fill,
                             }),
