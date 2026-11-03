@@ -1,4 +1,4 @@
-# DrawnUI for Slint .NET bindings
+# DrawnUI for Slint .NET (community)
 
 `DrawnUi.Slint.Net` hosts DrawnUI canvases, from the `DrawnUi.Net` package, in the windows of an app built on the
 community Slint .NET bindings: the [`yurkinh.slint.net`](https://www.nuget.org/packages/yurkinh.slint.net) package, built
