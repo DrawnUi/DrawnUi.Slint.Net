@@ -5,6 +5,28 @@
 //     import { DrawnUiView } from "drawnui.slint";
 //     export { DrawnUiHost } from "drawnui.slint";
 
+// One accessibility node of a canvas, for screen readers: the canvas' snapshot, in the view's logical pixels.
+// role: 0 none, 1 button, 2 checkbox, 3 switch, 4 slider, 5 progress, 6 text input, 7 combobox, 8 tab, 9 tab list,
+// 10 tab panel, 11 list, 12 list item, 13 image, 14 text, 15 group
+export struct DrawnUiNode {
+    view: int,
+    id: int,
+    role: int,
+    label: string,
+    hint: string,
+    value: string,
+    minimum: float,
+    maximum: float,
+    step: float,
+    enabled: bool,
+    checkable: bool,
+    checked: bool,
+    x: length,
+    y: length,
+    w: length,
+    h: length,
+}
+
 export global DrawnUiHost {
     // The latest frame of each view, by view id.
     in property <[image]> frames;
@@ -18,6 +40,35 @@ export global DrawnUiHost {
     callback key(view-id: int, pressed: bool, text: string, shift: bool, control: bool, alt: bool) -> bool;
     // Text from an input method, such as a phone's on-screen keyboard.
     callback text(view-id: int, text: string);
+    // The accessibility nodes of every view, which screen readers read; a reader's press and its step up / down.
+    in property <[DrawnUiNode]> nodes;
+    callback activate(view-id: int, id: int);
+    callback adjust(view-id: int, id: int, increment: bool);
+}
+
+// The accessible element of one node; its role is set where it is used.
+component DrawnUiAccessible inherits Rectangle {
+    in property <DrawnUiNode> node;
+    width: 100%;
+    height: 100%;
+    accessible-label: node.label;
+    accessible-description: node.hint;
+    accessible-enabled: node.enabled;
+    accessible-checkable: node.checkable;
+    accessible-checked: node.checked;
+    accessible-value: node.value;
+    accessible-value-minimum: node.minimum;
+    accessible-value-maximum: node.maximum;
+    accessible-value-step: node.step;
+    accessible-action-default => {
+        DrawnUiHost.activate(node.view, node.id);
+    }
+    accessible-action-increment => {
+        DrawnUiHost.adjust(node.view, node.id, true);
+    }
+    accessible-action-decrement => {
+        DrawnUiHost.adjust(node.view, node.id, false);
+    }
 }
 
 export component DrawnUiView inherits Rectangle {
@@ -56,6 +107,32 @@ export component DrawnUiView inherits Rectangle {
         // A frame has the view's size in physical pixels, which an image would otherwise ask the layout for.
         preferred-width: 0px;
         preferred-height: 0px;
+        // the frame is pixels, readers read the nodes below
+        accessible-role: none;
+    }
+
+    // What screen readers read: an element per accessibility node of the canvas, over the drawn control, with no input
+    // of its own (pointer and keys still go to the canvas). A role must be a constant: one conditional element per role.
+    for node in DrawnUiHost.nodes : Rectangle {
+        x: node.x;
+        y: node.y;
+        width: node.w;
+        height: node.h;
+        if node.view == root.view-id && node.role == 1 : DrawnUiAccessible { node: node; accessible-role: button; }
+        if node.view == root.view-id && node.role == 2 : DrawnUiAccessible { node: node; accessible-role: checkbox; }
+        if node.view == root.view-id && node.role == 3 : DrawnUiAccessible { node: node; accessible-role: switch; }
+        if node.view == root.view-id && node.role == 4 : DrawnUiAccessible { node: node; accessible-role: slider; }
+        if node.view == root.view-id && node.role == 5 : DrawnUiAccessible { node: node; accessible-role: progress-indicator; }
+        if node.view == root.view-id && node.role == 6 : DrawnUiAccessible { node: node; accessible-role: text-input; }
+        if node.view == root.view-id && node.role == 7 : DrawnUiAccessible { node: node; accessible-role: combobox; }
+        if node.view == root.view-id && node.role == 8 : DrawnUiAccessible { node: node; accessible-role: tab; }
+        if node.view == root.view-id && node.role == 9 : DrawnUiAccessible { node: node; accessible-role: tab-list; }
+        if node.view == root.view-id && node.role == 10 : DrawnUiAccessible { node: node; accessible-role: tab-panel; }
+        if node.view == root.view-id && node.role == 11 : DrawnUiAccessible { node: node; accessible-role: list; }
+        if node.view == root.view-id && node.role == 12 : DrawnUiAccessible { node: node; accessible-role: list-item; }
+        if node.view == root.view-id && node.role == 13 : DrawnUiAccessible { node: node; accessible-role: image; }
+        if node.view == root.view-id && node.role == 14 : DrawnUiAccessible { node: node; accessible-role: text; }
+        if node.view == root.view-id && node.role == 15 : DrawnUiAccessible { node: node; accessible-role: groupbox; }
     }
 
     focus := FocusScope {
@@ -102,6 +179,8 @@ export component DrawnUiView inherits Rectangle {
             width: 1px;
             height: 1px;
             color: transparent;
+            // only the input method's target: readers read the drawn editor's node
+            accessible-role: none;
             edited => {
                 if self.text != "" {
                     DrawnUiHost.text(root.view-id, self.text);

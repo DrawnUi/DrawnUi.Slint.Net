@@ -93,6 +93,48 @@ public sealed class SlintCanvasHost : IDisposable
         _framePeriod = TimeSpan.FromSeconds(1 / refreshRate);
         // Animators and Update() ask for a frame; it draws then, at most once a display frame.
         Canvas.FrameRequested += OnFrameRequested;
+        // Screen readers read the canvas' snapshot, rebuilt at most once a second while it changes.
+        Canvas.AccessibilityManager.Changed += OnAccessibilityChanged;
+        Canvas.AccessibilityManager.RebuildSkipped += OnAccessibilityRebuildSkipped;
+    }
+
+    private bool _accessibilityRefreshScheduled;
+
+    // The snapshot is rebuilt at most once a second at a frame end: when the canvas goes idle right after a change (a page
+    // opened), the rebuild it skipped runs once that second is over, or readers keep the nodes of the page that left.
+    private void OnAccessibilityRebuildSkipped(long remainingMs)
+    {
+        void Schedule()
+        {
+            if (_accessibilityRefreshScheduled || _disposed)
+                return;
+            _accessibilityRefreshScheduled = true;
+            SlintTimer.SingleShot(TimeSpan.FromMilliseconds(Math.Max(1, remainingMs) + 16), () =>
+            {
+                _accessibilityRefreshScheduled = false;
+                if (!_disposed)
+                    Canvas.AccessibilityManager.RefreshIfStale(Canvas.RenderingScale); // raises Changed when it differs
+            });
+        }
+
+        if (MainThread.IsMainThread)
+            Schedule();
+        else
+            SlintEventLoop.InvokeFromEventLoop(Schedule);
+    }
+
+    private void OnAccessibilityChanged()
+    {
+        if (MainThread.IsMainThread)
+            PublishAccessibility();
+        else
+            SlintEventLoop.InvokeFromEventLoop(PublishAccessibility);
+    }
+
+    private void PublishAccessibility()
+    {
+        if (!_disposed)
+            _views.SetNodes(ViewId, SlintAccessibility.Rows(ViewId, Canvas.AccessibilityManager.Snapshot));
     }
 
     // Raised once until the next frame starts, on the thread that asked (it can be a background thread).
@@ -355,6 +397,9 @@ public sealed class SlintCanvasHost : IDisposable
             return;
         _disposed = true;
         Canvas.FrameRequested -= OnFrameRequested;
+        Canvas.AccessibilityManager.Changed -= OnAccessibilityChanged;
+        Canvas.AccessibilityManager.RebuildSkipped -= OnAccessibilityRebuildSkipped;
+        _views.SetNodes(ViewId, []);
         _views.Remove(this);
         Canvas.Dispose();
         _surface?.Dispose();
@@ -374,6 +419,7 @@ public sealed class SlintCanvasHost : IDisposable
         private readonly SlintComponent _component;
         private readonly global::Slint.ListModel<SlintImage> _frames = new();
         private readonly global::Slint.ListModel<bool> _editing = new();
+        private readonly global::Slint.ListModel<global::Slint.Struct> _nodes = new();
         private readonly Dictionary<int, SlintCanvasHost> _hosts = new();
         private readonly List<SlintGpuRenderer.Target> _released = new();
 
@@ -396,6 +442,17 @@ public sealed class SlintCanvasHost : IDisposable
             }
             component.SetGlobalProperty(Global, "frames", _frames);
             component.SetGlobalProperty(Global, "editing", _editing);
+            component.SetGlobalProperty(Global, "nodes", _nodes);
+            component.SetGlobalCallback(Global, "activate", args =>
+            {
+                if (Find(args) is { } host)
+                    SlintAccessibility.Activate(host.Canvas, ToInt(args[1]));
+            });
+            component.SetGlobalCallback(Global, "adjust", args =>
+            {
+                if (Find(args) is { } host)
+                    SlintAccessibility.Adjust(host.Canvas, ToInt(args[1]), (bool)args[2]!);
+            });
             component.SetGlobalCallback(Global, "text", args => Find(args)?.Canvas.HandleDesktopTextInput((string)args[1]!));
             component.SetGlobalCallback(Global, "resized", args => Find(args)?.Resize(ToFloat(args[1]), ToFloat(args[2])));
             component.SetGlobalCallback(Global, "pointer", args =>
@@ -430,6 +487,17 @@ public sealed class SlintCanvasHost : IDisposable
         }
 
         public void Show(int viewId, SlintImage frame) => _frames[viewId] = frame;
+
+        /// <summary>Replaces the accessibility rows of the view <paramref name="viewId"/>.</summary>
+        public void SetNodes(int viewId, IEnumerable<global::Slint.Struct> rows)
+        {
+            for (var i = _nodes.RowCount - 1; i >= 0; i--)
+            {
+                if (ToInt(_nodes[i]["view"]) == viewId)
+                    _nodes.RemoveAt(i);
+            }
+            _nodes.AddRange(rows);
+        }
 
         public void SetEditing(int viewId, bool editing)
         {
