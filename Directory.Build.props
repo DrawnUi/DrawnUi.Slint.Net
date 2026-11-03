@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
     <!-- The DrawnUi.Net package every project here builds on. -->
-    <DrawnUiVersion>1.10.8.17-pre15</DrawnUiVersion>
+    <DrawnUiVersion>1.10.8.17</DrawnUiVersion>
   </PropertyGroup>
 </Project>
