@@ -4,7 +4,7 @@ using DrawnUi.Models;
 using DrawnUi.Views;
 using SlintStruct = global::Slint.Struct;
 
-namespace DrawnUi.Slint;
+namespace DrawnUi.Slint.Net;
 
 /// <summary>
 /// Screen readers for a Slint view: the canvas' accessibility snapshot as <c>DrawnUiNode</c> rows of

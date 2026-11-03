@@ -1,7 +1,7 @@
 using DrawnUi.Draw;
 using DrawnUi.Views;
 
-namespace DrawnUi.Slint;
+namespace DrawnUi.Slint.Net;
 
 /// <summary>
 /// Slint's key events for DrawnUI: keyboard navigation (Tab, and the keys of the node in focus), editor actions and text

@@ -1,5 +1,5 @@
 using DrawnUi.Draw;
-using DrawnUi.Slint;
+using DrawnUi.Slint.Net;
 using SlintEmbed;
 using Slint;
 using Event = Slint.WindowEvent;

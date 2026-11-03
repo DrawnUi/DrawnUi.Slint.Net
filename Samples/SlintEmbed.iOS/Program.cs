@@ -1,5 +1,5 @@
 using DrawnUi.Draw;
-using DrawnUi.Slint;
+using DrawnUi.Slint.Net;
 using SlintEmbed;
 using Color = DrawnUi.Color;
 

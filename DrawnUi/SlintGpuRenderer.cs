@@ -2,7 +2,7 @@ using SkiaSharp;
 using GraphicsApi = global::Slint.GraphicsApi;
 using SlintImage = global::Slint.Image;
 
-namespace DrawnUi.Slint;
+namespace DrawnUi.Slint.Net;
 
 /// <summary>
 /// Draws canvases with Skia on the OpenGL context of a window's Slint renderer, each into a texture that its view shows,

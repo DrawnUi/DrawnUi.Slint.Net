@@ -9,7 +9,7 @@ using SlintEventLoop = global::Slint.EventLoop;
 using SlintImage = global::Slint.Image;
 using SlintTimer = global::Slint.Timer;
 
-namespace DrawnUi.Slint;
+namespace DrawnUi.Slint.Net;
 
 /// <summary>
 /// Runs a DrawnUI <see cref="Views.Canvas"/> in a <c>DrawnUiView</c> of a Slint component, from <c>drawnui.slint</c>.

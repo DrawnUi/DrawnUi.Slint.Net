@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../DrawnUi/DrawnUi.Slint.csproj" />
+    <ProjectReference Include="../../DrawnUi/DrawnUi.Slint.Net.csproj" />
     <PackageReference Include="DrawnUi.Net.Game" Version="$(DrawnUiVersion)" />
     <!-- Slint's build files, which generate the classes, reach only direct references. -->
     <PackageReference Include="yurkinh.slint.net" Version="1.19.0-preview.10" />
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <!-- What a package reference to DrawnUi.Slint imports by itself: drawnui.slint for the app's imports. -->
-  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.props" />
-  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.targets" />
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.Net.props" />
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.Net.targets" />
 
 </Project>

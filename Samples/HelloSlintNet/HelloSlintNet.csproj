@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- As in the other .NET Hello apps, whose pages these are. -->
+    <Nullable>disable</Nullable>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SlintFile Include="ui/main.slint" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../DrawnUi/DrawnUi.Slint.Net.csproj" />
+    <PackageReference Include="DrawnUi.Net.Game" Version="$(DrawnUiVersion)" />
+    <!-- Slint's build files, which generate the classes, reach only direct references. -->
+    <PackageReference Include="yurkinh.slint.net" Version="1.19.0-preview.10" />
+  </ItemGroup>
+
+  <!-- The shared Pong game, the same code as every Pong sample. -->
+  <Import Project="../Pong.Shared/Pong.Shared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <Content Include="fonts/**/*.*;images/**/*.*;shaders/**/*.*;anims/**/*.*;lottie/**/*.*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- What a package reference to DrawnUi.Slint imports by itself: drawnui.slint for the app's imports. -->
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.Net.props" />
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.Net.targets" />
+
+</Project>

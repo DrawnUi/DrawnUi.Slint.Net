@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>SlintEmbed</RootNamespace>
     <ApplicationId>com.companyname.drawnui.slintembed</ApplicationId>
-    <ApplicationTitle>DrawnUI on Slint</ApplicationTitle>
+    <ApplicationTitle>DrawnUI on Slint.NET</ApplicationTitle>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <!-- The ABIs that Slint has libraries for: devices, and emulators on x86_64. -->
@@ -23,12 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../DrawnUi/DrawnUi.Slint.csproj" />
+    <ProjectReference Include="../../DrawnUi/DrawnUi.Slint.Net.csproj" />
     <PackageReference Include="yurkinh.slint.net" Version="1.19.0-preview.10" />
   </ItemGroup>
 
   <!-- What a package reference to DrawnUi.Slint imports by itself: drawnui.slint for the app's imports. -->
-  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.props" />
-  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.targets" />
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.Net.props" />
+  <Import Project="../../DrawnUi/buildTransitive/DrawnUi.Slint.Net.targets" />
 
 </Project>

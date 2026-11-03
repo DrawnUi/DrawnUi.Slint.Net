@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Slint for .NET targets .NET 10. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Title>DrawnUI for Slint.NET</Title>
+    <PackageId>DrawnUi.Slint.Net</PackageId>
+    <Description>DrawnUI canvases in apps built on the community Slint .NET bindings (yurkinh.slint.net), on desktop and mobile. Not made or endorsed by Slint.</Description>
+    <PackageTags>drawnui slint skia skiasharp desktop</PackageTags>
+    <PackageIcon>icon128.png</PackageIcon>
+    <CreatePackage>false</CreatePackage>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\icon128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <!-- The component that apps import, and the build file that lets them, see SlintCanvasHost. -->
+    <None Include="slint/drawnui.slint" Pack="true" PackagePath="slint/" />
+    <None Include="buildTransitive/DrawnUi.Slint.Net.props;buildTransitive/DrawnUi.Slint.Net.targets" Pack="true" PackagePath="buildTransitive/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DrawnUi.Net" Version="$(DrawnUiVersion)" />
+    <PackageReference Include="yurkinh.slint.net" Version="1.19.0-preview.10" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.148.0" />
+  </ItemGroup>
+
+</Project>

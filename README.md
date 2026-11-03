@@ -1,17 +1,20 @@
-# DrawnUI for Slint
+# DrawnUI for Slint .NET bindings
 
-`DrawnUi.Slint` hosts DrawnUI canvases, from the `DrawnUi.Net` package, in the windows of a [Slint for .NET](https://github.com/yurkinh/slint/tree/dotnet_bindings/api/dotnet) app.
+`DrawnUi.Slint.Net` hosts DrawnUI canvases, from the `DrawnUi.Net` package, in the windows of an app built on the
+community Slint .NET bindings: the [`yurkinh.slint.net`](https://www.nuget.org/packages/yurkinh.slint.net) package, built
+from [yurkinh/slint](https://github.com/yurkinh/slint/tree/dotnet_bindings/api/dotnet). Slint has not released .NET
+bindings of its own; this project is not made or endorsed by Slint (SixtyFPS GmbH).
 A Slint UI and DrawnUI controls share a window: a `DrawnUiView` element shows a canvas, and passes its size, mouse, wheel, and keyboard input to it.
 
 ![The gallery: a Slint sidebar, and DrawnUI's shader page](screenshots/gallery.jpg)
 
 ## Use It
 
-Reference the package, and Slint for .NET, whose build files generate the classes of the app's `.slint` files:
+Reference the package, and the Slint .NET bindings, whose build files generate the classes of the app's `.slint` files:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="DrawnUi.Slint" Version="..." />
+  <PackageReference Include="DrawnUi.Slint.Net" Version="..." />
   <PackageReference Include="yurkinh.slint.net" Version="1.19.0-preview.10" />
   <SlintFile Include="ui/main.slint" />
 </ItemGroup>
@@ -45,7 +48,7 @@ Pass a canvas of your own to `Attach`, such as Pong's `RescalingCanvas`, to use 
 Register fonts and styles with `Super.UseDrawnUi()`, as on the other .NET heads.
 
 The samples in this repository reference the library's project instead,
-and import `DrawnUi/buildTransitive/DrawnUi.Slint.props` and `.targets`, which a package reference imports by itself.
+and import `DrawnUi/buildTransitive/DrawnUi.Slint.Net.props` and `.targets`, which a package reference imports by itself.
 
 ## How It Works
 
@@ -92,17 +95,17 @@ or in the `Main` that calls `Run` on iOS.
 
 Run them from the repository's root.
 
-- `Samples/HelloSlint`: the DrawnUI Hello app, the same pages as on the other heads in one window-filling view:
+- `Samples/HelloSlintNet`: the DrawnUI Hello app, the same pages as on the other heads in one window-filling view:
   recycled cells, Lottie, shaders, the editor, the shell, tooltips and menus, Pong, and more.
 - `Samples/SlintEmbed`: two views next to a Slint header: a button whose taps reach the Slint UI, an editor, cards that light up on hover, and a ball that the arrow keys move.
   `SlintEmbed.Android` and `SlintEmbed.iOS` run the same scenes and `.slint` file on phones.
 - `Samples/SlintPong`: the shared Pong game in a whole window, with the keyboard from the start.
 
 ```
-dotnet run --project Samples/HelloSlint
+dotnet run --project Samples/HelloSlintNet
 ```
 
-`DRAWNUI_GPU=1` selects Slint's FemtoVG renderer on OpenGL, for the GPU path; HelloSlint takes it by default, and `DRAWNUI_GPU=0` keeps it on the raster path.
+`DRAWNUI_GPU=1` selects Slint's FemtoVG renderer on OpenGL, for the GPU path; HelloSlintNet takes it by default, and `DRAWNUI_GPU=0` keeps it on the raster path.
 `DRAWNUI_SELFTEST=<directory>` runs a sample as a test: it sends window events, as a user's mouse and keyboard would, saves frames as PNG files, and quits.
 
 ## Games

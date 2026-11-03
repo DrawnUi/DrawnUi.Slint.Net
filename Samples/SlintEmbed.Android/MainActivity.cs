@@ -1,11 +1,11 @@
 using DrawnUi.Draw;
-using DrawnUi.Slint;
+using DrawnUi.Slint.Net;
 using Slint.Android;
 using Color = DrawnUi.Color;
 
 namespace SlintEmbed;
 
-[Activity(Label = "DrawnUI on Slint", MainLauncher = true, Exported = true, ConfigurationChanges = SlintActivity.ConfigurationChanges)]
+[Activity(Label = "DrawnUI on Slint.NET", MainLauncher = true, Exported = true, ConfigurationChanges = SlintActivity.ConfigurationChanges)]
 [MetaData(SlintActivity.LibraryNameKey, Value = SlintActivity.LibraryName)]
 public class MainActivity : SlintActivity
 {

@@ -1,7 +1,7 @@
 using DrawnUi.Draw;
 using SkiaSharp;
 
-namespace DrawnUi.Slint;
+namespace DrawnUi.Slint.Net;
 
 /// <summary>The raster surface that <see cref="SlintCanvasHost"/> renders the canvas into.</summary>
 internal sealed class SlintDrawable : ISkiaDrawable

@@ -1,6 +1,6 @@
 using GraphicsApi = global::Slint.GraphicsApi;
 
-namespace DrawnUi.Slint;
+namespace DrawnUi.Slint.Net;
 
 /// <summary>The OpenGL functions that <see cref="SlintGpuRenderer"/> calls itself, from Slint's context.</summary>
 internal sealed unsafe class SlintGl

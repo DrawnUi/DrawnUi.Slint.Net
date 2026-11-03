@@ -1,4 +1,4 @@
-using DrawnUi.Slint;
+using DrawnUi.Slint.Net;
 using Pong.Game;
 using Slint;
 using SlintPong;
