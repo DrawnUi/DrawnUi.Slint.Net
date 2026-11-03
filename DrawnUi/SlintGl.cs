@@ -37,6 +37,7 @@ internal sealed unsafe class SlintGl
     private readonly delegate* unmanaged<uint, uint, void> _bindBuffer;
     private readonly delegate* unmanaged<uint, void> _activeTexture;
     private readonly delegate* unmanaged<uint, int, void> _pixelStorei;
+    private readonly delegate* unmanaged<void> _finish;
     private readonly delegate* unmanaged<int, int, int, int, uint, uint, void*, void> _readPixels;
     private readonly delegate* unmanaged<uint, byte*, void> _getBooleanv;
     private readonly delegate* unmanaged<byte, void> _depthMask;
@@ -64,6 +65,7 @@ internal sealed unsafe class SlintGl
         _bindBuffer = (delegate* unmanaged<uint, uint, void>)Load(api, "glBindBuffer");
         _activeTexture = (delegate* unmanaged<uint, void>)Load(api, "glActiveTexture");
         _pixelStorei = (delegate* unmanaged<uint, int, void>)Load(api, "glPixelStorei");
+        _finish = (delegate* unmanaged<void>)Load(api, "glFinish");
         _readPixels = (delegate* unmanaged<int, int, int, int, uint, uint, void*, void>)Load(api, "glReadPixels");
         _getBooleanv = (delegate* unmanaged<uint, byte*, void>)Load(api, "glGetBooleanv");
         _depthMask = (delegate* unmanaged<byte, void>)Load(api, "glDepthMask");
@@ -95,6 +97,9 @@ internal sealed unsafe class SlintGl
     }
 
     public void DeleteTexture(uint texture) => _deleteTextures(1, &texture);
+
+    /// <summary>Waits until the GPU has run every command sent so far.</summary>
+    public void Finish() => _finish();
 
     /// <summary>The window's framebuffer as RGBA rows from the top, as Slint rendered it.</summary>
     public (int Width, int Height, byte[] Pixels) ReadWindow()

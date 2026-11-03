@@ -339,6 +339,7 @@ public sealed class SlintCanvasHost : IDisposable
         Canvas.WidthRequest = _logicalWidth;
         Canvas.HeightRequest = _logicalHeight;
         _drawable.HasDrawn = false;
+        _views.Resized();
         return true;
     }
 
@@ -527,6 +528,11 @@ public sealed class SlintCanvasHost : IDisposable
 
         public void RequestRedraw() => _component.Window.RequestRedraw();
 
+        private long _resizedAt;
+
+        /// <summary>A view took a new size: the frames of the next moments wait for the GPU before Slint presents them.</summary>
+        public void Resized() => _resizedAt = Stopwatch.GetTimestamp();
+
         public void ReleaseLater(SlintGpuRenderer.Target? target)
         {
             if (target != null)
@@ -535,6 +541,12 @@ public sealed class SlintCanvasHost : IDisposable
 
         private void OnRendering(global::Slint.RenderingState state, global::Slint.GraphicsApi api)
         {
+            // On Windows, a frame presented while the GPU still runs it, in the middle of a resize, makes the next
+            // resize wait up to 2.5 s on the compositor (seen on Intel Arc). For 500 ms after a size change the frame
+            // is finished before Slint presents it; other frames keep the GPU running behind.
+            if (state == global::Slint.RenderingState.AfterRendering && Gpu != null && _windowGl != null && _resizedAt != 0
+                && Stopwatch.GetElapsedTime(_resizedAt).TotalMilliseconds < 500)
+                _windowGl.Finish();
             switch (state)
             {
                 case global::Slint.RenderingState.RenderingSetup when api.Kind == global::Slint.GraphicsApiKind.NativeOpenGL:
