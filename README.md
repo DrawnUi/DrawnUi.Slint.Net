@@ -1,5 +1,10 @@
 # DrawnUI for Slint .NET (community)
 
+Bring the whole DrawnUI toolbox into your Slint app, from C#: drawn controls, smooth lists, animations, Lottie,
+shaders, 2D and 3D transforms, gestures, keyboard navigation and screen readers, side by side with your Slint UI in
+the same window. It is the same engine as DrawnUI for .NET, React and Rust: the full DrawnUI Hello app runs here
+unchanged.
+
 `DrawnUi.Slint.Net` hosts DrawnUI canvases, from the `DrawnUi.Net` package, in the windows of an app built on the
 community Slint .NET bindings: the [`yurkinh.slint.net`](https://www.nuget.org/packages/yurkinh.slint.net) package, built
 from [yurkinh/slint](https://github.com/yurkinh/slint/tree/dotnet_bindings/api/dotnet). Slint has not released .NET
@@ -8,6 +13,16 @@ Our code is MIT; an app that uses it also takes on Slint's license, see [Licensi
 A Slint UI and DrawnUI controls share a window: a `DrawnUiView` element shows a canvas, and passes its size, mouse, wheel, and keyboard input to it.
 
 ![The gallery: a Slint sidebar, and DrawnUI's shader page](screenshots/gallery.jpg)
+
+## What you get, all drawn in a Slint window
+
+- **Every DrawnUI control:** layouts, recycled lists, shell navigation, carousel, drawer, editor, toggles, sliders.
+- **Animations and media:** a frame loop for anything, Lottie and GIF, sprites, SVG, images.
+- **Effects:** SkSL shaders on any control, shader transitions, 2D and 3D transforms.
+- **Input:** mouse, touch, wheel and keyboard pass from Slint to the canvas; Tab and arrows move through drawn controls.
+- **Accessibility:** drawn controls show up to screen readers as Slint accessible elements.
+- **CPU or GPU:** draws into an image Slint shows, or with `UseGpu` on Slint's OpenGL context; an idle canvas costs no CPU.
+- **MIT:** our code is MIT licensed; see [Licensing](#licensing) for Slint's own terms.
 
 ## Use It
 
